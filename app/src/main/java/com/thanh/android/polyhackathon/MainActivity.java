@@ -2,30 +2,38 @@ package com.thanh.android.polyhackathon;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.location.Address;
+import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
-import android.net.Uri;
+import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -34,18 +42,21 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
 
 
-
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private GoogleMap mMap;
     SupportMapFragment mapFragment;
     Button btnCheckin;
-    TextView txtLocation;
+    TextView txtLocation, txtSchoolLocation;
     Location mylocation;
     Address addressMyLocation;
-    Double MyLocationAltitude;
-    LatLng latLngPoly;
+    Double myLocationLatitude;
+    Double myLocationLngtitude;
+    LatLng latLngMyLocation;
     EditText edtLocation;
     ProgressBar progressLoad;
+    SeekBar seekBar;
+    private Circle mCircle;
+    private Marker mMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_LOCATION);
-        }
-        else {
+        } else {
             mapFragment.getMapAsync(MainActivity.this);
         }
         initControls();
@@ -78,15 +88,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initEvents() {
         btnCheckin.setOnClickListener(this);
-        edtLocation.setOnKeyListener(new View.OnKeyListener() {
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                if (keyEvent.equals(KeyEvent.KEYCODE_ENTER)){
-                    setMarker();
-                }
-                return false;
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                txtLocation.setText(i + " ");
+//                if (mCircle == null || mMarker == null) {
+//                    drawMarkerWithCircle(i, latLngMyLocation);
+//                } else {
+//                    updateMarkerWithCircle(latLngMyLocation);
+//                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
+
     }
 
     private void initDisplays() {
@@ -99,6 +122,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         txtLocation = (TextView) findViewById(R.id.textView_Location);
         edtLocation = (EditText) findViewById(R.id.edtLocation);
         progressLoad = (ProgressBar) findViewById(R.id.process_main);
+        seekBar = (SeekBar) findViewById(R.id.seekBar_metter);
+        
+
     }
 
 
@@ -132,9 +158,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+            @Override
+            public void onMyLocationChange(Location location) {
+                mylocation = location;
+                myLocationLatitude = location.getLatitude();
+                myLocationLngtitude = location.getLongitude();
+                latLngMyLocation = new LatLng(myLocationLatitude, myLocationLngtitude);
+                txtLocation.setText(myLocationLatitude + " " + myLocationLngtitude);
+////                seekBar.setVisibility(View.VISIBLE);
+//                if (mCircle == null || mMarker == null) {
+//                    drawMarkerWithCircle(50, latLngMyLocation);
+//                } else {
+//                    updateMarkerWithCircle(latLngMyLocation);
+//                }
+            }
+        });
 
 //        latLngPoly = new LatLng(10.79085214, 106.68211162);
 //        mMap.addMarker(new MarkerOptions().position(latLngPoly).title("poly hcm"));
+//        mMap.setOnMyLocationClickListener(myLocationClickListener);
     }
 
     @Override
@@ -163,54 +206,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.button_checkin:
 
-                setMarker();
-
+//                setMarker();
                 break;
         }
     }
 
-    private void setMarker() {
-        progressLoad.setVisibility(View.VISIBLE);
-        String adress = edtLocation.getText().toString();
-        try{
-            LatLng latLngAddress = getLocationFromAddress(getApplicationContext(), adress);
 
-            mMap.addMarker(new MarkerOptions().position(latLngAddress));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngAddress, 10));
-
-        } catch (Exception e){
-            Log.d("LOCATION", e +"");
-        } finally {
-            progressLoad.setVisibility(View.GONE);
-        }
-
+    private void updateMarkerWithCircle(LatLng position) {
+        mCircle.setCenter(position);
+        mMarker.setPosition(position);
     }
 
-    public LatLng getLocationFromAddress(Context context, String strAddress) {
+    private void drawMarkerWithCircle(double RadiusInMeters,LatLng position) {
+        double radiusInMeters = RadiusInMeters;
+        int strokeColor = 0xffff0000; //red outline
+        int shadeColor = 0x44ff0000; //opaque red fill
 
-        Geocoder coder = new Geocoder(context);
-        List<Address> address;
-        LatLng p1 = null;
+        CircleOptions circleOptions = new CircleOptions().center(position).radius(radiusInMeters).fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8);
+        mCircle = mMap.addCircle(circleOptions);
 
-        try {
-            // May throw an IOException
-            address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
-                return null;
-            }
-            Address location = address.get(0);
-            location.getLatitude();
-            location.getLongitude();
-
-            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        return p1;
+        MarkerOptions markerOptions = new MarkerOptions().position(position);
+        mMarker = mMap.addMarker(markerOptions);
     }
+
 }
