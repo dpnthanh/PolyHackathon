@@ -8,4 +8,8 @@
     <string name="Login">Login</string>
     <string name="forgotpass">Forgot Password</string>
     <string name="register">register</string>
+    <string name="error_null_username">Please Enter Email</string>
+    <string name="error_null_password">Please Enter Password</string>
+    <string name="error_null_confirmPassword">Please Enter Confirm Password</string>
+    <string name="error_confirmPasswordNotTrue">Confirm password not true</string>
 </resources>
