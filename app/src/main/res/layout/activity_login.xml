@@ -45,10 +45,10 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
-    <com.google.android.gms.common.SignInButton
-        android:visibility="gone"
-        android:id="@+id/sign_in_facebook_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/buttonSchool"
+        android:text="School"
+        android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

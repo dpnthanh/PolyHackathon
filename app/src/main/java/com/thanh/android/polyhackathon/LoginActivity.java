@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     private static final String TAG = "login";
     EditText edtUserName, edtPass;
-    Button btnLogin, btnRegister;
+    Button btnLogin, btnRegister, btnSchool;
     TextView txtForgotPass;
     ProgressBar progressBarLoadding;
     private static final int RC_SIGN_IN = 9001;
@@ -92,6 +92,7 @@ public class LoginActivity extends AppCompatActivity implements
         btnLogin.setOnClickListener(this);
         btnRegister.setOnClickListener(this);
         txtForgotPass.setOnClickListener(this);
+        btnSchool.setOnClickListener(this);
     }
 
     private void initDisplay() {
@@ -107,6 +108,7 @@ public class LoginActivity extends AppCompatActivity implements
         txtForgotPass = (TextView) findViewById(R.id.textView_forgotPassword_loginActivity);
         progressBarLoadding = (ProgressBar) findViewById(R.id.progressBar_loading_loginActivity);
         mAuth = FirebaseAuth.getInstance();
+        btnSchool = (Button) findViewById(R.id.buttonSchool);
 
 
     }
@@ -141,6 +143,10 @@ public class LoginActivity extends AppCompatActivity implements
                 break;
             case R.id.sign_in_google_button:
                 signIn();
+                break;
+            case R.id.buttonSchool:
+                Intent intent1 = new Intent(getApplicationContext(), SchoolActivity.class);
+                startActivity(intent1);
                 break;
         }
     }

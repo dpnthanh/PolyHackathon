@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -30,9 +31,25 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+
+import java.io.*;
+
+import android.app.*;
+import android.content.*;
+import android.net.*;
+import android.os.*;
+import android.view.*;
+import android.graphics.*;
+import android.widget.*;
+import android.provider.*;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
 
 
+    private final int PICK_IMAGE = 1;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private GoogleMap mMap;
     SupportMapFragment mapFragment;
@@ -53,7 +70,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker mMarker;
     Double distanceToSchool;
     Boolean firstOpentApp = true;
+    ImageView imgPhoto;
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("School");
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +99,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             mapFragment.getMapAsync(MainActivity.this);
         }
+
         initControls();
         initDisplays();
         initEvents();
+        initFace();
+    }
+
+    private void initFace() {
+
     }
 
     private void initEvents() {
@@ -123,12 +149,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
-                    if (mMarker!= null){
+                    if (mMarker != null) {
                         mMarker.remove();
                     }
-                    SchoolLocationLatitude = dataSnapshot.child("Lat").getValue(Double.class);
-                    SchoolLocationLngtitude = dataSnapshot.child("Long").getValue(Double.class);
-                    latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
+
+                    double Lat = dataSnapshot.child("Lat").getValue(Double.class);
+                    double Lng = dataSnapshot.child("Long").getValue(Double.class);
+                    setSchoolLatLng(Lat, Lng);
                     mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude)));
                     StudentStatus();
                     Log.d("firebase", SchoolLocationLatitude + " " + SchoolLocationLngtitude);
@@ -147,11 +174,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initDisplays() {
 
+
+
         txtLocation.setVisibility(View.GONE);
         txtSchoolLocation.setVisibility(View.GONE);
         txtSchoolLocation.setText("School location \n" + SchoolLocationLatitude + " " + SchoolLocationLngtitude);
         txtStudentStatus.setText(distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) + "");
-//        AddMakerWithLatLng(10.790912, 106.682154);
     }
 
     private void initControls() {
@@ -164,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         progressLoad = (ProgressBar) findViewById(R.id.process_main);
         seekBar = (SeekBar) findViewById(R.id.seekBar_metter);
 
+        imgPhoto = (ImageView) findViewById(R.id.imageViewPhoto);
         getLatLngSchoolData();
 
         latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
@@ -173,6 +202,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+    }
+
+    private void setSchoolLatLng(double Lat, double Lng) {
+        SchoolLocationLatitude = Lat;
+        SchoolLocationLngtitude = Lng;
+        latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
 
     }
 
@@ -190,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
 
         // Add a marker in Sydney and move the camera
 //        LatLng sydney = new LatLng(-34, 151);
@@ -226,6 +263,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (firstOpentApp) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngMyLocation, 15));
                     firstOpentApp = false;
+                }
+                if (SchoolLocationLngtitude != 0.0){
+                    mMarker.remove();
+                    mMarker = mMap.addMarker(new MarkerOptions().position(latLngSchoolLocation));
                 }
             }
         });
@@ -266,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (view.getId()) {
             case R.id.button_checkin:
 
+//                GetImageInGallery();
 //                Toast.makeText(this, Lat, Toast.LENGTH_SHORT).show();
 //                String adr = txtLocation.getText().toString().trim();
 //                setMarker(adr);
@@ -380,8 +422,51 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return d;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == PICK_IMAGE
+//                && resultCode == RESULT_OK
+//                && data != null
+//                && data.getData() != null){
+//            //get link image in device
+//            Uri uri = data.getData();
+//            try {
+//                //get bitmap
+//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+//                //set image and show in screen
+//                imgPhoto.setImageBitmap(bitmap);
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            imgPhoto.setImageBitmap(imageBitmap);
+        }
+    }
+
     public Double rad(double x) {
         return x * Math.PI / 180;
+    }
+
+//    private void GetImageInGallery() {
+//        Intent intentGallery = new Intent(Intent.ACTION_GET_CONTENT);
+//        intentGallery.setType("image/*");
+//        startActivityForResult(Intent.createChooser(intentGallery,
+//                "Select Picture"),
+//                PICK_IMAGE);
+//    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
     }
 
 }
