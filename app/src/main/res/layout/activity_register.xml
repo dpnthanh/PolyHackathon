@@ -15,11 +15,14 @@
     <EditText
         android:id="@+id/editText_password_registerActivity"
         android:hint="@string/password"
+        android:inputType="textPassword"
         android:layout_width="@dimen/width_main"
         android:layout_height="wrap_content" />
     <EditText
+        android:hint="@string/confirn_password"
         android:id="@+id/editText_confirmPassword_registerActivity"
         android:layout_width="@dimen/width_main"
+        android:inputType="textPassword"
         android:layout_height="wrap_content" />
     <Button
         android:id="@+id/button_register_registerActivity"
