@@ -2,36 +2,24 @@ package com.thanh.android.polyhackathon;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
-
-
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 1;
     private GoogleMap mMap;
     SupportMapFragment mapFragment;
-    Button btnCheckin;
-    TextView txtLocation;
-    Location Mylocation;
-    Double MyLocationAltitude;
-    LatLng latLngPoly;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -45,30 +33,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            ActivityCompat.requestPermissions(MainActivity.this,
+            ActivityCompat.requestPermissions(MapsActivity.this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_LOCATION);
         }
         else {
-            mapFragment.getMapAsync(MainActivity.this);
+            mapFragment.getMapAsync(MapsActivity.this);
         }
-        initControls();
-        initDisplays();
-        initEvents();
-    }
-
-    private void initEvents() {
-        btnCheckin.setOnClickListener(this);
-    }
-
-    private void initDisplays() {
-
-    }
-
-    private void initControls() {
-        //mapped
-        btnCheckin = (Button) findViewById(R.id.button_checkin);
-        txtLocation = (TextView) findViewById(R.id.textView_Location);
     }
 
 
@@ -113,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
-                    mapFragment.getMapAsync(MainActivity.this);
+                    mapFragment.getMapAsync(MapsActivity.this);
                 } else {
 
                     // permission denied, boo! Disable the
@@ -124,16 +95,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             // other 'case' lines to check for other
             // permissions this app might request
-        }
-    }
-
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.button_checkin:
-//                txtLocation.setText(Mylocation.getAltitude()+"");
-                break;
         }
     }
 }

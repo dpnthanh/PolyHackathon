@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PolyHackathon</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="button_checking">Checkin</string>
 </resources>
