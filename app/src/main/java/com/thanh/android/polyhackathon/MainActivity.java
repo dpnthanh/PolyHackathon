@@ -1,19 +1,35 @@
 package com.thanh.android.polyhackathon;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
 
@@ -24,9 +40,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     SupportMapFragment mapFragment;
     Button btnCheckin;
     TextView txtLocation;
-    Location Mylocation;
+    Location mylocation;
+    Address addressMyLocation;
     Double MyLocationAltitude;
     LatLng latLngPoly;
+    EditText edtLocation;
+    ProgressBar progressLoad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +78,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initEvents() {
         btnCheckin.setOnClickListener(this);
+        edtLocation.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if (keyEvent.equals(KeyEvent.KEYCODE_ENTER)){
+                    setMarker();
+                }
+                return false;
+            }
+        });
     }
 
     private void initDisplays() {
@@ -69,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //mapped
         btnCheckin = (Button) findViewById(R.id.button_checkin);
         txtLocation = (TextView) findViewById(R.id.textView_Location);
+        edtLocation = (EditText) findViewById(R.id.edtLocation);
+        progressLoad = (ProgressBar) findViewById(R.id.process_main);
     }
 
 
@@ -102,6 +132,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+
+//        latLngPoly = new LatLng(10.79085214, 106.68211162);
+//        mMap.addMarker(new MarkerOptions().position(latLngPoly).title("poly hcm"));
     }
 
     @Override
@@ -132,8 +165,52 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.button_checkin:
-//                txtLocation.setText(Mylocation.getAltitude()+"");
+
+                setMarker();
+
                 break;
         }
+    }
+
+    private void setMarker() {
+        progressLoad.setVisibility(View.VISIBLE);
+        String adress = edtLocation.getText().toString();
+        try{
+            LatLng latLngAddress = getLocationFromAddress(getApplicationContext(), adress);
+
+            mMap.addMarker(new MarkerOptions().position(latLngAddress));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngAddress, 10));
+
+        } catch (Exception e){
+            Log.d("LOCATION", e +"");
+        } finally {
+            progressLoad.setVisibility(View.GONE);
+        }
+
+    }
+
+    public LatLng getLocationFromAddress(Context context, String strAddress) {
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            // May throw an IOException
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+            Address location = address.get(0);
+            location.getLatitude();
+            location.getLongitude();
+
+            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return p1;
     }
 }

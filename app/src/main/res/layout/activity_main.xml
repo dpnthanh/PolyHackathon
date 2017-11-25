@@ -17,6 +17,10 @@
         android:layout_height="@dimen/height_map"
         android:layout_marginTop="@dimen/margitTop_map"
         tools:context="com.thanh.android.polyhackathon.MapsActivity" />
+    <EditText
+        android:id="@+id/edtLocation"
+        android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
     <Button
         android:id="@+id/button_checkin"
         android:text="@string/button_checking"
@@ -27,6 +31,11 @@
         android:gravity="center"
         android:textSize="20dp"
         android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
+    <ProgressBar
+        android:id="@+id/process_main"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
 
