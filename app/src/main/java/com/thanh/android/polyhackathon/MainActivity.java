@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initDisplays() {
 
+        txtLocation.setVisibility(View.GONE);
+        txtSchoolLocation.setVisibility(View.GONE);
         txtSchoolLocation.setText("School location \n" + SchoolLocationLatitude + " " + SchoolLocationLngtitude);
         txtStudentStatus.setText(distanceTwoPoin(latLngMyLocation, latLngSchoolLocation)+"");
 //        AddMakerWithLatLng(10.790912, 106.682154);
@@ -213,8 +215,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_checkin:
-                String adr = txtLocation.getText().toString().trim();
-                setMarker(adr);
+
+//                String adr = txtLocation.getText().toString().trim();
+//                setMarker(adr);
                 break;
         }
     }
@@ -279,9 +282,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private String StudentStatus() {
         if (distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) < 20.0){
-            return "Đang ở trường \n" + "cách trường : " + distanceToSchool + " metter";
+            btnCheckin.setEnabled(true);
+            return "Đang ở trường";
+
         } else{
-            return "Đang không ở trường \n" + "cách trường : " + distanceToSchool + " metter";
+            btnCheckin.setEnabled(false);
+            return "Đang không ở trường, không được check in \n" + "cách trường : " + distanceToSchool + " metter";
         }
 
 
@@ -310,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = R * c;
         Log.d("location", "distance " + d);
+        d = Math.round(d);
         distanceToSchool = d;
         return d;
     }

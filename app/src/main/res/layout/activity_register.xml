@@ -1,9 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.thanh.android.polyhackathon.RegisterActivity">
+    tools:context="com.thanh.android.polyhackathon.LoginActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <EditText
+        android:id="@+id/editText_username_registerActivity"
+        android:hint="@string/username"
+        android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/editText_password_registerActivity"
+        android:hint="@string/password"
+        android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/editText_confirmPassword_registerActivity"
+        android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/button_register_registerActivity"
+        android:text="@string/register"
+        android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/button_login_registerActivity"
+        android:text="@string/Login"
+        android:layout_width="@dimen/width_main"
+        android:layout_height="wrap_content" />
+    <ProgressBar
+        android:id="@+id/progressBar_loading_registerActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>
