@@ -30,7 +30,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        
+
         initControls();
         initDisplay();
         initEvents();
@@ -71,46 +71,65 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.button_login_registerActivity:
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
+                moveToLogin();
                 break;
             case R.id.button_register_registerActivity:
+
                 createAccount();
                 break;
         }
     }
 
+    private void moveToLogin() {
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("signout", true);
+        if (!edtUserName.getText().toString().trim().isEmpty()) {
+            bundle.putString("username", edtUserName.getText().toString().trim());
+        }
+        if (!edtPass.getText().toString().trim().isEmpty()) {
+            bundle.putString("pass", edtPass.getText().toString().trim());
+        }
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
     private void createAccount() {
+
         Log.d(TAG, "Createa Account");
-        progressBarLoadding.setVisibility(View.VISIBLE);
         String usename = edtUserName.getText().toString().trim();
         String pass = edtPass.getText().toString().trim();
         String cofPass = edtCofPass.getText().toString().trim();
         boolean allowLogin = true;
-        if (usename.isEmpty()){
+        if (usename.isEmpty()) {
             edtUserName.setError(getResources().getString(R.string.error_null_username));
             allowLogin = false;
         }
-        if (pass.isEmpty()){
-            edtPass.setError(getResources().getString(R.string.error_null_password));allowLogin = false;
+        if (pass.isEmpty()) {
+            edtPass.setError(getResources().getString(R.string.error_null_password));
+            allowLogin = false;
             allowLogin = false;
         }
-        if (cofPass.isEmpty()){
+        if (cofPass.isEmpty()) {
             edtCofPass.setError(getResources().getString(R.string.error_null_confirmPassword));
             allowLogin = false;
         }
-        if (!pass.equals(cofPass)){
+        if (!pass.equals(cofPass)) {
             edtCofPass.setError(getResources().getString(R.string.error_confirmPasswordNotTrue));
         }
-        if (allowLogin){
+        if (allowLogin) {
+            progressBarLoadding.setVisibility(View.VISIBLE);
             mAuth.createUserWithEmailAndPassword(usename, pass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "createUserWithEmail:success");
+                        Toast.makeText(RegisterActivity.this, "Create Account Sucess", Toast.LENGTH_SHORT).show();
+                        progressBarLoadding.setVisibility(View.GONE);
+                        moveToLogin();
                         FirebaseUser user = mAuth.getCurrentUser();
                         updateUI(user);
                     } else {
@@ -118,12 +137,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
                         Toast.makeText(RegisterActivity.this, "Authentication failed.",
                                 Toast.LENGTH_SHORT).show();
+                        progressBarLoadding.setVisibility(View.GONE);
+
                         updateUI(null);
                     }
                 }
             });
         }
-        progressBarLoadding.setVisibility(View.GONE);
+
     }
 }
 

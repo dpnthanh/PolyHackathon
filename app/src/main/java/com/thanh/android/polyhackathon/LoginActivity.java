@@ -6,10 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
-import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -126,9 +123,15 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View view) {
+        if (signout){
+            signOut();
+        }
+        signout = false;
         switch (view.getId()) {
+
             case R.id.button_login_loginActivity:
                 loginWithEmailAccount();
+
                 break;
             case R.id.button_register_loginActivity:
                 Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
@@ -136,7 +139,7 @@ public class LoginActivity extends AppCompatActivity implements
                 break;
             case R.id.textView_forgotPassword_loginActivity:
                 break;
-            case R.id.sign_in_button:
+            case R.id.sign_in_google_button:
                 signIn();
                 break;
         }
@@ -148,7 +151,7 @@ public class LoginActivity extends AppCompatActivity implements
 
 
         // Button listeners
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
+        findViewById(R.id.sign_in_google_button).setOnClickListener(this);
 
 
         // [START configure_signin]
@@ -170,7 +173,7 @@ public class LoginActivity extends AppCompatActivity implements
 
         // [START customize_button]
         // Set the dimensions of the sign-in button.
-        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_google_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         // [END customize_button]
 
@@ -180,6 +183,7 @@ public class LoginActivity extends AppCompatActivity implements
     // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        if (signout) return;
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -216,9 +220,7 @@ public class LoginActivity extends AppCompatActivity implements
                     }
                 });
     }
-    // [END signOut]
 
-    // [START revokeAccess]
     private void revokeAccess() {
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
@@ -257,12 +259,12 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void updateUI(boolean signedIn) {
         if (signedIn) {
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+            findViewById(R.id.sign_in_google_button).setVisibility(View.GONE);
 
         } else {
 
 
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+            findViewById(R.id.sign_in_google_button).setVisibility(View.VISIBLE);
 
         }
     }
@@ -281,10 +283,10 @@ public class LoginActivity extends AppCompatActivity implements
         super.onStart();
         Intent intent = getIntent();
         signout = intent.getBooleanExtra("signout", false);
-        if (signout){
-            signOut();
-        }
+        edtUserName.setText(intent.getStringExtra("username"));
+        edtPass.setText(intent.getStringExtra("pass"));
 
+//        Toast.makeText(this, signout + "", Toast.LENGTH_SHORT).show();
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {
             // If the user's cached credentials are valid, the OptionalPendingResult will be "done"

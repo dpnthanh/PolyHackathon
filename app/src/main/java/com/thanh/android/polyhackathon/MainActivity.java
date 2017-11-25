@@ -17,11 +17,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +32,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
@@ -57,11 +57,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Circle mCircle;
     private Marker mMarker;
     Double distanceToSchool;
+    Boolean firstOpentApp = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -135,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SchoolLocationLngtitude = 106.682154;
         latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
         findViewById(R.id.btn_test_logout).setOnClickListener(this);
+        if (latLngMyLocation != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngMyLocation));
+        }
     }
 
 
@@ -165,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        mMap.setMapType(googleMap.MAP_TYPE_SATELLITE); // ve tinh khong co thong tin
 
         // vi tri hien tai
+
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
@@ -183,6 +189,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                    updateMarkerWithCircle(latLngMyLocation);
 //                }
                 txtStudentStatus.setText(StudentStatus());
+                if (firstOpentApp) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngMyLocation, 15));
+                    firstOpentApp = false;
+                }
             }
         });
         mMap.addMarker(new MarkerOptions().position(new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude)));
@@ -295,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private String StudentStatus() {
-        if (distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) < 20.0){
+        if (distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) < 65.0){
             btnCheckin.setEnabled(true);
             return "Đang ở trường";
 

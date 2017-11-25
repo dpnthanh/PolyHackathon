@@ -12,4 +12,5 @@
     <string name="error_null_password">Please Enter Password</string>
     <string name="error_null_confirmPassword">Please Enter Confirm Password</string>
     <string name="error_confirmPasswordNotTrue">Confirm password not true</string>
+    <string name="signout">Sign out</string>
 </resources>
