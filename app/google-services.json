@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "838581036017-oqf01dii0s9ncdln5mej71j9os5ibp72.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thanh.android.polyhackathon",
+            "certificate_hash": "a33eb2ff279142fa9063232c655895283493f7ce"
+          }
+        },
+        {
           "client_id": "838581036017-pp3oggpdbuo7u3j0t6kbtjigemjieguh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -18,6 +18,10 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -130,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SchoolLocationLatitude = 10.790912;
         SchoolLocationLngtitude = 106.682154;
         latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
-        findViewById(R.id.btn_test_login).setOnClickListener(this);
+        findViewById(R.id.btn_test_logout).setOnClickListener(this);
     }
 
 
@@ -220,9 +224,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                String adr = txtLocation.getText().toString().trim();
 //                setMarker(adr);
                 break;
-            case R.id.btn_test_login:
-                Intent intent =new Intent(getApplicationContext(),LoginActivity.class);
+            case R.id.btn_test_logout:
+//                LoginActivity loginActivity = new LoginActivity();
+//                loginActivity.signOut();
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("signout", true);
+                intent.putExtras(bundle);
                 startActivity(intent);
+                break;
         }
     }
 

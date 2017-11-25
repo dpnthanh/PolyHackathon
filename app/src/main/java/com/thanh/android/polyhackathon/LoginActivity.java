@@ -1,18 +1,15 @@
 package com.thanh.android.polyhackathon;
 
-<<<<<<< HEAD
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
-=======
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
->>>>>>> ac0b330a8fd4c1a78e548b740f5439436704ec06
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,8 +18,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-<<<<<<< HEAD
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -35,13 +30,11 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
 import java.io.ByteArrayOutputStream;
-=======
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
->>>>>>> ac0b330a8fd4c1a78e548b740f5439436704ec06
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -52,8 +45,6 @@ public class LoginActivity extends AppCompatActivity implements
     Button btnLogin, btnRegister;
     TextView txtForgotPass;
     ProgressBar progressBarLoadding;
-<<<<<<< HEAD
-    private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
@@ -62,9 +53,8 @@ public class LoginActivity extends AppCompatActivity implements
     private ImageView imageViewAvatar;
     private ProgressDialog mProgressDialog;
     private String url = "http://10.200.202.125//serverlocal/post_data_sign_up.php";
-=======
     private FirebaseAuth mAuth;
->>>>>>> ac0b330a8fd4c1a78e548b740f5439436704ec06
+    boolean signout = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +64,7 @@ public class LoginActivity extends AppCompatActivity implements
         initControls();
         initDisplay();
         initEvents();
-<<<<<<< HEAD
         initGoogle();
-=======
         checkUser();
     }
 
@@ -100,7 +88,6 @@ public class LoginActivity extends AppCompatActivity implements
             }
         }
 
->>>>>>> ac0b330a8fd4c1a78e548b740f5439436704ec06
     }
 
 
@@ -125,14 +112,6 @@ public class LoginActivity extends AppCompatActivity implements
         mAuth = FirebaseAuth.getInstance();
 
 
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
     }
 
     private void updateUI(FirebaseUser currentUser) {
@@ -204,12 +183,15 @@ public class LoginActivity extends AppCompatActivity implements
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
             Toast.makeText(getApplicationContext(),"User ID"+acct.getId(),Toast.LENGTH_LONG).show();
 
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
         }
+
     }
 
 
@@ -223,14 +205,13 @@ public class LoginActivity extends AppCompatActivity implements
     // [END signIn]
 
     // [START signOut]
-    private void signOut() {
+    public void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
                         // [START_EXCLUDE]
                         updateUI(false);
-                        mStatusIdTextView.setText("");
                         // [END_EXCLUDE]
                     }
                 });
@@ -298,6 +279,11 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onStart() {
         super.onStart();
+        Intent intent = getIntent();
+        signout = intent.getBooleanExtra("signout", false);
+        if (signout){
+            signOut();
+        }
 
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {

@@ -58,7 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <Button
-        android:id="@+id/btn_test_login"
+        android:id="@+id/btn_test_logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Login"/>
