@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "838581036017-pp3oggpdbuo7u3j0t6kbtjigemjieguh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thanh.android.polyhackathon",
+            "certificate_hash": "b4fe47696a949b37ad1bffc2bcd9c8c92957c788"
+          }
+        },
+        {
           "client_id": "838581036017-bu2j3ra84uvm284p9k3u7t0q5b3521ht.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "838581036017-bu2j3ra84uvm284p9k3u7t0q5b3521ht.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

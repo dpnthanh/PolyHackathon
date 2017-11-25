@@ -2,12 +2,13 @@ package com.thanh.android.polyhackathon;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -16,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -130,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SchoolLocationLatitude = 10.790912;
         SchoolLocationLngtitude = 106.682154;
         latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
+        findViewById(R.id.btn_test_login).setOnClickListener(this);
     }
 
 
@@ -219,6 +220,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                String adr = txtLocation.getText().toString().trim();
 //                setMarker(adr);
                 break;
+            case R.id.btn_test_login:
+                Intent intent =new Intent(getApplicationContext(),LoginActivity.class);
+                startActivity(intent);
         }
     }
 
