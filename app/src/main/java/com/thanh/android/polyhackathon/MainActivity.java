@@ -1,11 +1,9 @@
 package com.thanh.android.polyhackathon;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -17,23 +15,20 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
 
@@ -58,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker mMarker;
     Double distanceToSchool;
     Boolean firstOpentApp = true;
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("School");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,12 +110,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getLatLngSchoolData();
+    }
+
+
+    private void getLatLngSchoolData() {
+        DatabaseReference databaseReference = mDatabase.child("Fpoly");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                try {
+                    if (mMarker!= null){
+                        mMarker.remove();
+                    }
+                    SchoolLocationLatitude = dataSnapshot.child("Lat").getValue(Double.class);
+                    SchoolLocationLngtitude = dataSnapshot.child("Long").getValue(Double.class);
+                    latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
+                    mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude)));
+                    StudentStatus();
+                    Log.d("firebase", SchoolLocationLatitude + " " + SchoolLocationLngtitude);
+                } catch (Exception e) {
+                    Log.d("data", e + "");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void initDisplays() {
 
         txtLocation.setVisibility(View.GONE);
         txtSchoolLocation.setVisibility(View.GONE);
         txtSchoolLocation.setText("School location \n" + SchoolLocationLatitude + " " + SchoolLocationLngtitude);
-        txtStudentStatus.setText(distanceTwoPoin(latLngMyLocation, latLngSchoolLocation)+"");
+        txtStudentStatus.setText(distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) + "");
 //        AddMakerWithLatLng(10.790912, 106.682154);
     }
 
@@ -133,13 +164,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         progressLoad = (ProgressBar) findViewById(R.id.process_main);
         seekBar = (SeekBar) findViewById(R.id.seekBar_metter);
 
-        SchoolLocationLatitude = 10.790912;
-        SchoolLocationLngtitude = 106.682154;
+        getLatLngSchoolData();
+
         latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
         findViewById(R.id.btn_test_logout).setOnClickListener(this);
         if (latLngMyLocation != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLngMyLocation));
         }
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
     }
 
 
@@ -195,12 +229,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
-        mMap.addMarker(new MarkerOptions().position(new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude)));
+
 
 //        latLngPoly = new LatLng(10.79085214, 106.68211162);
 //        mMap.addMarker(new MarkerOptions().position(latLngPoly).title("poly hcm"));
 //        mMap.setOnMyLocationClickListener(myLocationClickListener);
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -231,12 +266,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (view.getId()) {
             case R.id.button_checkin:
 
+//                Toast.makeText(this, Lat, Toast.LENGTH_SHORT).show();
 //                String adr = txtLocation.getText().toString().trim();
 //                setMarker(adr);
                 break;
             case R.id.btn_test_logout:
-//                LoginActivity loginActivity = new LoginActivity();
-//                loginActivity.signOut();
+
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("signout", true);
@@ -252,64 +287,64 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMarker.setPosition(position);
     }
 
-    private void drawMarkerWithCircle(double RadiusInMeters, LatLng position) {
-        double radiusInMeters = RadiusInMeters;
-        int strokeColor = 0xffff0000; //red outline
-        int shadeColor = 0x44ff0000; //opaque red fill
+//    private void drawMarkerWithCircle(double RadiusInMeters, LatLng position) {
+//        double radiusInMeters = RadiusInMeters;
+//        int strokeColor = 0xffff0000; //red outline
+//        int shadeColor = 0x44ff0000; //opaque red fill
+//
+//        CircleOptions circleOptions = new CircleOptions().center(position).radius(radiusInMeters).fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8);
+//        mCircle = mMap.addCircle(circleOptions);
+//
+//        MarkerOptions markerOptions = new MarkerOptions().position(position);
+//        mMarker = mMap.addMarker(markerOptions);
+//    }
 
-        CircleOptions circleOptions = new CircleOptions().center(position).radius(radiusInMeters).fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8);
-        mCircle = mMap.addCircle(circleOptions);
+//    private void setMarker(String Adress) {
+//        progressLoad.setVisibility(View.VISIBLE);
+//        String adress = Adress;
+//        try {
+//            LatLng latLngAddress = getLocationFromAddress(getApplicationContext(), adress);
+//
+//            mMap.addMarker(new MarkerOptions().position(latLngAddress));
+//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngAddress, 10));
+//
+//        } catch (Exception e) {
+//            Log.d("LOCATION", e + "");
+//        } finally {
+//            progressLoad.setVisibility(View.GONE);
+//        }
+//    }
 
-        MarkerOptions markerOptions = new MarkerOptions().position(position);
-        mMarker = mMap.addMarker(markerOptions);
-    }
-
-    private void setMarker(String Adress) {
-        progressLoad.setVisibility(View.VISIBLE);
-        String adress = Adress;
-        try {
-            LatLng latLngAddress = getLocationFromAddress(getApplicationContext(), adress);
-
-            mMap.addMarker(new MarkerOptions().position(latLngAddress));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngAddress, 10));
-
-        } catch (Exception e) {
-            Log.d("LOCATION", e + "");
-        } finally {
-            progressLoad.setVisibility(View.GONE);
-        }
-    }
-
-    public LatLng getLocationFromAddress(Context context, String strAddress) {
-
-        Geocoder coder = new Geocoder(context);
-        List<Address> address;
-        LatLng p1 = null;
-
-        try {
-            // May throw an IOException
-            address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
-                return null;
-            }
-            Address location = address.get(0);
-            location.getLatitude();
-            location.getLongitude();
-
-            p1 = new LatLng(location.getLatitude(), location.getLongitude());
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return p1;
-    }
+//    public LatLng getLocationFromAddress(Context context, String strAddress) {
+//
+//        Geocoder coder = new Geocoder(context);
+//        List<Address> address;
+//        LatLng p1 = null;
+//
+//        try {
+//            // May throw an IOException
+//            address = coder.getFromLocationName(strAddress, 5);
+//            if (address == null) {
+//                return null;
+//            }
+//            Address location = address.get(0);
+//            location.getLatitude();
+//            location.getLongitude();
+//
+//            p1 = new LatLng(location.getLatitude(), location.getLongitude());
+//
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//        }
+//        return p1;
+//    }
 
     private String StudentStatus() {
-        if (distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) < 65.0){
+        if (distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) < 65.0) {
             btnCheckin.setEnabled(true);
             return "Đang ở trường";
 
-        } else{
+        } else {
             btnCheckin.setEnabled(false);
             return "Đang không ở trường, không được check in \n" + "cách trường : " + distanceToSchool + " metter";
         }
@@ -317,16 +352,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void AddMakerWithLatLng(double latitude, double longtitude) {
-        try {
-            LatLng latLng = new LatLng(latitude, longtitude);
-            mMap.addMarker(new MarkerOptions().position(latLng));
-        }catch (Exception e){
-            Log.d("location", "add maker " + e);
-        }
-    }
+//    private void AddMakerWithLatLng(double latitude, double longtitude) {
+//        try {
+//            LatLng latLng = new LatLng(latitude, longtitude);
+//            mMap.addMarker(new MarkerOptions().position(latLng));
+//        }catch (Exception e){
+//            Log.d("location", "add maker " + e);
+//        }
+//    }
 
-    public double distanceTwoPoin(LatLng p1, LatLng p2){
+    public double distanceTwoPoin(LatLng p1, LatLng p2) {
         if (p1 == null) return -1;
         double R = 6378137.0;
         Log.d("location", "p2 la " + p2.latitude);
@@ -344,8 +379,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         distanceToSchool = d;
         return d;
     }
-    public Double rad(double x){
-        return x * Math.PI/180;
+
+    public Double rad(double x) {
+        return x * Math.PI / 180;
     }
 
 }
