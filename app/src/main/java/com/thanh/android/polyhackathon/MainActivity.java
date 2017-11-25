@@ -3,35 +3,27 @@ package com.thanh.android.polyhackathon;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -46,17 +38,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     SupportMapFragment mapFragment;
     Button btnCheckin;
-    TextView txtLocation, txtSchoolLocation;
+    TextView txtLocation, txtSchoolLocation, txtStudentStatus;
     Location mylocation;
     Address addressMyLocation;
-    Double myLocationLatitude;
-    Double myLocationLngtitude;
+    double myLocationLatitude;
+    double myLocationLngtitude;
+    double SchoolLocationLatitude;
+    double SchoolLocationLngtitude;
     LatLng latLngMyLocation;
+    LatLng latLngSchoolLocation;
     EditText edtLocation;
     ProgressBar progressLoad;
     SeekBar seekBar;
     private Circle mCircle;
     private Marker mMarker;
+    Double distanceToSchool;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,17 +110,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initDisplays() {
 
+        txtSchoolLocation.setText("School location \n" + SchoolLocationLatitude + " " + SchoolLocationLngtitude);
+        txtStudentStatus.setText(distanceTwoPoin(latLngMyLocation, latLngSchoolLocation)+"");
+//        AddMakerWithLatLng(10.790912, 106.682154);
     }
 
     private void initControls() {
         //mapped
         btnCheckin = (Button) findViewById(R.id.button_checkin);
         txtLocation = (TextView) findViewById(R.id.textView_Location);
+        txtSchoolLocation = (TextView) findViewById(R.id.textView_LocationSchool);
+        txtStudentStatus = (TextView) findViewById(R.id.textView_studentStatus);
         edtLocation = (EditText) findViewById(R.id.edtLocation);
         progressLoad = (ProgressBar) findViewById(R.id.process_main);
         seekBar = (SeekBar) findViewById(R.id.seekBar_metter);
-        
 
+        SchoolLocationLatitude = 10.790912;
+        SchoolLocationLngtitude = 106.682154;
+        latLngSchoolLocation = new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude);
     }
 
 
@@ -172,8 +175,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                } else {
 //                    updateMarkerWithCircle(latLngMyLocation);
 //                }
+                txtStudentStatus.setText(StudentStatus());
             }
         });
+        mMap.addMarker(new MarkerOptions().position(new LatLng(SchoolLocationLatitude, SchoolLocationLngtitude)));
 
 //        latLngPoly = new LatLng(10.79085214, 106.68211162);
 //        mMap.addMarker(new MarkerOptions().position(latLngPoly).title("poly hcm"));
@@ -208,8 +213,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_checkin:
-
-//                setMarker();
+                String adr = txtLocation.getText().toString().trim();
+                setMarker(adr);
                 break;
         }
     }
@@ -220,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMarker.setPosition(position);
     }
 
-    private void drawMarkerWithCircle(double RadiusInMeters,LatLng position) {
+    private void drawMarkerWithCircle(double RadiusInMeters, LatLng position) {
         double radiusInMeters = RadiusInMeters;
         int strokeColor = 0xffff0000; //red outline
         int shadeColor = 0x44ff0000; //opaque red fill
@@ -230,6 +235,86 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         MarkerOptions markerOptions = new MarkerOptions().position(position);
         mMarker = mMap.addMarker(markerOptions);
+    }
+
+    private void setMarker(String Adress) {
+        progressLoad.setVisibility(View.VISIBLE);
+        String adress = Adress;
+        try {
+            LatLng latLngAddress = getLocationFromAddress(getApplicationContext(), adress);
+
+            mMap.addMarker(new MarkerOptions().position(latLngAddress));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngAddress, 10));
+
+        } catch (Exception e) {
+            Log.d("LOCATION", e + "");
+        } finally {
+            progressLoad.setVisibility(View.GONE);
+        }
+    }
+
+    public LatLng getLocationFromAddress(Context context, String strAddress) {
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            // May throw an IOException
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+            Address location = address.get(0);
+            location.getLatitude();
+            location.getLongitude();
+
+            p1 = new LatLng(location.getLatitude(), location.getLongitude());
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return p1;
+    }
+
+    private String StudentStatus() {
+        if (distanceTwoPoin(latLngMyLocation, latLngSchoolLocation) < 20.0){
+            return "Đang ở trường \n" + "cách trường : " + distanceToSchool + " metter";
+        } else{
+            return "Đang không ở trường \n" + "cách trường : " + distanceToSchool + " metter";
+        }
+
+
+    }
+
+    private void AddMakerWithLatLng(double latitude, double longtitude) {
+        try {
+            LatLng latLng = new LatLng(latitude, longtitude);
+            mMap.addMarker(new MarkerOptions().position(latLng));
+        }catch (Exception e){
+            Log.d("location", "add maker " + e);
+        }
+    }
+
+    public double distanceTwoPoin(LatLng p1, LatLng p2){
+        if (p1 == null) return -1;
+        double R = 6378137.0;
+        Log.d("location", "p2 la " + p2.latitude);
+
+        Log.d("location", "p1 la " + p1.latitude);
+        double dLat = rad(p2.latitude - p1.latitude);
+        double dLng = rad(p2.longitude - p1.longitude);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(rad(p1.latitude)) * Math.cos(rad(p2.latitude)) *
+                        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = R * c;
+        Log.d("location", "distance " + d);
+        distanceToSchool = d;
+        return d;
+    }
+    public Double rad(double x){
+        return x * Math.PI/180;
     }
 
 }
