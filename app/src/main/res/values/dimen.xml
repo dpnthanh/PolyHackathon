@@ -4,4 +4,6 @@
     <dimen name="height_map">150dp</dimen>
     <dimen name="height_map_large">300dp</dimen>
     <dimen name="margitTop_map">10dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
 </resources>

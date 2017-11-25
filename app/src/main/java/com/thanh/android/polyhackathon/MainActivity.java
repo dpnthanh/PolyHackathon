@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("School");
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -175,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void initDisplays() {
 
 
-
         txtLocation.setVisibility(View.GONE);
         txtSchoolLocation.setVisibility(View.GONE);
         txtSchoolLocation.setText("School location \n" + SchoolLocationLatitude + " " + SchoolLocationLngtitude);
@@ -264,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngMyLocation, 15));
                     firstOpentApp = false;
                 }
-                if (SchoolLocationLngtitude != 0.0){
+                if (SchoolLocationLngtitude != 0.0) {
                     mMarker.remove();
                     mMarker = mMap.addMarker(new MarkerOptions().position(latLngSchoolLocation));
                 }
@@ -306,7 +304,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_checkin:
-
+                Intent intent1 = new Intent(getApplicationContext(), ScanActivity.class);
+                startActivity(intent1);
 //                GetImageInGallery();
 //                Toast.makeText(this, Lat, Toast.LENGTH_SHORT).show();
 //                String adr = txtLocation.getText().toString().trim();
